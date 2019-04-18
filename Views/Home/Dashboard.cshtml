@@ -1,0 +1,55 @@
+@model Wall
+<div class = "row  align-items-end">
+    <div class = "col-md-4 text-left" > <h1>Dojo Wall</h1></div>
+    <div class = "col-md-4 align-text-top text-center" >  </div>
+    <div class = "col-md-4 text-center " ></div>
+</div>
+<div class = "row  align-items-end">
+    <div class = "col-md-4 text-left" ></div>
+    <div class = "col-md-4 align-text-top text-right" > <p>Welcome @Model.User.FirstName @Model.User.LastName </p> </div>
+    <div class = "col-md-4 text-center " ><a href="javascript:if(confirm('Do you want to log out?'))location='/logout'">Log out </a></div>
+</div>
+
+<hr>
+<div class="row">
+    <form asp-action="NewMessage" asp-controller="Home" method="post">
+        <div class="mb-3" >
+        <div><span asp-validation-for="NewMessage" class="text-danger small"></span></div>
+        <label asp-for="NewMessage" class=" col-form-label "></label>
+        <input type="text" class="form-control form-control-sm" id="colFormLabel"  asp-for="NewMessage" placeholder="Write your message">
+        </div>
+        <input type="hidden" asp-for="UserId" value="@Model.User.UserId">
+<br>
+        <button class="btn btn-primary btn-lg " type="submit">Post a Message</button>
+    </form>
+</div>
+
+@{
+    foreach(Message message in Model.AllMessages.OrderByDescending(mes =>mes.CreatedAt))
+    {
+        <h2>@message.Creator.FirstName  @message.Creator.LastName --@message.CreatedAt.ToString("MM dd yyyy h:mm tt")</h2>
+        <h4>@message.MessageContent</h4>
+        foreach(Comment comment in message.OwnedComments)
+        {
+            <li style="color:blue;"> @comment.CommentContent --- @comment.Creator.FirstName @comment.Creator.LastName at @comment.CreatedAt.ToString("MM/DD/yyyy h:mm tt") 
+            @if((comment.UserId == Model.User.UserId)&&(DateTime.Now.Subtract(comment.CreatedAt).TotalMinutes<30))
+            {
+                <a href="javascript:if(confirm('Confirm delete?'))location='/deleteComment/@comment.CommentId'"  class="btn btn-second" >Delete  Comment</a>
+            }
+            </li>
+        }
+       <div class="row">
+        <form asp-action="NewComment" asp-controller="Home" method="post">
+            <div class="mb-3" >
+            <div><span asp-validation-for="NewComment" class="text-danger small"></span></div>
+            <label asp-for="NewComment" class=" col-form-label "></label>
+            <input type="text" class="form-control form-control-sm" id="colFormLabel"  asp-for="NewComment" placeholder="write your comment">
+            </div>
+            <input type="hidden" asp-for="UserId" value="@Model.User.UserId">
+            <input type="hidden" asp-for="MessageId" value="@message.MessageId">
+            <br>
+            <button class="btn btn-second" type="submit">Post a Comment</button>
+        </form>
+</div>
+    }
+}
